@@ -1,81 +1,96 @@
-import { Component } from "react";
-import ToDoItem from "./ToDoItem";
-import DoneItem from "./DoneItem";
+import React, { useState, useCallback, useRef } from 'react';
+import ToDoItem from './ToDoItem';
+import DoneItem from './DoneItem';
 
-class ToDoList extends Component {
-    state = {
-        inputValue: '',
-        items: [{ id: 1, task: "Get started with my to-do list" }],
-        dones: []
-    }
+const ToDoList = () => {
+    const [inputValue, setInputValue] = useState('');
+    const [items, setItems] = useState([{ id: 1, task: 'Get started with my to-do list' }]);
+    const [dones, setDones] = useState([]);
+    const nextId = useRef(2);
 
-    onChange = (event) => {
-        const value = event.target.value;
-        this.setState({ inputValue: value });
-    }
+    const onChange = (event) => {
+        setInputValue(event.target.value);
+    };
 
-    addItem = (event) => {
+    const addItem = (event) => {
         event.preventDefault();
         const newItem = {
-            id: this.state.items.length + this.state.dones.length + 1,
-            task: this.state.inputValue
+            id: nextId.current,
+            task: inputValue,
         };
-        this.setState((prevState) => ({
-            items: [...prevState.items, newItem],
-            inputValue: ''
-        }));
-    }
+        setItems((prevItems) => [...prevItems, newItem]);
+        setInputValue('');
+        nextId.current += 1;
+        console.log('Added new item:', newItem);
+    };
 
-    markAsDone = (id) => {
-        this.setState((prevState) => {
-            const item = prevState.items.find((item) => item.id === id);
-            return {
-                items: prevState.items.filter((item) => item.id !== id),
-                dones: [...prevState.dones, item]
-            };
+    const markAsDone = useCallback((id) => {
+        setItems((prevItems) => {
+            const item = prevItems.find((item) => item.id === id);
+            console.log('Marking as done:', item);
+            if (item) {
+                setDones((prevDones) => {
+                    const alreadyDone = prevDones.some((doneItem) => doneItem.id === id);
+                    if (!alreadyDone) {
+                        const updatedDones = [...prevDones, item];
+                        console.log('Updated dones:', updatedDones);
+                        return updatedDones;
+                    }
+                    return prevDones;
+                });
+                const updatedItems = prevItems.filter((item) => item.id !== id);
+                console.log('Updated items:', updatedItems);
+                return updatedItems;
+            }
+            return prevItems;
         });
-    }
+    }, []);
 
-    removeItem = (id) => {
-        this.setState((prevState) => ({
-            dones: prevState.dones.filter((item) => item.id !== id)
-        }));
-    }
+    const removeItem = useCallback((id) => {
+        console.log('Removing item with id:', id);
+        setDones((prevDones) => prevDones.filter((item) => item.id !== id));
+    }, []);
 
-    backToToDo = (id) => {
-        this.setState((prevState) => {
-            const item = prevState.dones.find((item) => item.id === id);
-            return {
-                dones: prevState.dones.filter((item) => item.id !== id),
-                items: [...prevState.items, item]
-            };
+    const backToToDo = useCallback((id) => {
+        setDones((prevDones) => {
+            const item = prevDones.find((item) => item.id === id);
+            console.log('Returning to to-do:', item);
+            if (item) {
+                setItems((prevItems) => {
+                    const alreadyInToDo = prevItems.some((todoItem) => todoItem.id === id);
+                    if (!alreadyInToDo) {
+                        const updatedItems = [...prevItems, item];
+                        console.log('Updated items:', updatedItems);
+                        return updatedItems;
+                    }
+                    return prevItems;
+                });
+                const updatedDones = prevDones.filter((item) => item.id !== id);
+                console.log('Updated dones:', updatedDones);
+                return updatedDones;
+            }
+            return prevDones;
         });
-    }
+    }, []);
 
-    shouldComponentUpdate(nextProps, nextState) {
-        return this.state.items !== nextState.items || this.state.dones !== nextState.dones || this.state.inputValue !== nextState.inputValue;
-    }
+    return (
+        <div className="todo-list">
+            <form onSubmit={addItem} className="item-form">
+                <input type="text" onChange={onChange} value={inputValue} />
+                <button type="submit">Add To-Do Item</button>
+            </form>
 
-    render() {
-        return (
-            <div className="todo-list">
-                <form onSubmit={this.addItem} className="item-form">
-                    <input type="text" onChange={this.onChange} value={this.state.inputValue} />
-                    <button type="submit">Add To-Do Item</button>
-                </form>
+            <h3>To-Do Items</h3>
+            {items.map((item) => (
+                <ToDoItem key={item.id} id={item.id} task={item.task} action={markAsDone} />
+            ))}
 
-                <h3>To-Do Items</h3>
-                {this.state.items.map((item) => (
-                    <ToDoItem key={item.id} id={item.id} task={item.task} action={this.markAsDone} />
-                ))}
-
-                <h3>Done Items</h3>
-                {this.state.dones.map((item) => (
-                    <DoneItem key={item.id} id={item.id} task={item.task} action1={this.removeItem} action2={this.backToToDo} />
-                ))}
-            </div>
-        );
-    }
-}
+            <h3>Done Items</h3>
+            {dones.map((item) => (
+                <DoneItem key={item.id} id={item.id} task={item.task} action1={removeItem} action2={backToToDo} />
+            ))}
+        </div>
+    );
+};
 
 export default ToDoList;
