@@ -1,0 +1,60 @@
+.todoList {
+    display: flex;
+    justify-content: space-between;
+}
+
+.itemForm {
+    margin-bottom: 20px;
+}
+
+.column {
+    flex: 1;
+    padding: 0 10px;
+}
+
+.card {
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    padding: 10px;
+    margin-bottom: 10px;
+    position: relative;
+}
+
+.colorLineTodo {
+    position: absolute;
+    top: 0;
+    left: -5px;
+    width: 5px;
+    height: 100%;
+    background-color: red;
+}
+
+.colorLineInProgress {
+    position: absolute;
+    top: 0;
+    left: -5px;
+    width: 5px;
+    height: 100%;
+    background-color: yellow;
+}
+
+.colorLineDone {
+    position: absolute;
+    top: 0;
+    left: -5px;
+    width: 5px;
+    height: 100%;
+    background-color: green;
+}
+
+.todo {
+    border-color: red;
+}
+
+.inProgress {
+    border-color: yellow;
+}
+
+.done {
+    border-color: green;
+}

@@ -1,13 +1,12 @@
 import React from 'react';
 
-const DoneItem = React.memo(({ task, id, action1, action2 }) => {
+const DoneItem = ({ task, id, removeFromDone }) => {
     return (
         <div className='done-item'>
             <p>{task}</p>
-            <button onClick={() => action1(id)}>Remove</button>
-            <button onClick={() => action2(id)}>Back</button>
+            <button onClick={() => removeFromDone(id)}>Remove</button>
         </div>
     );
-});
+};
 
 export default DoneItem;
